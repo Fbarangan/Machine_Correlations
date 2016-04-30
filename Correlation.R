@@ -4,6 +4,8 @@
 library(MethComp)
 library(dplyr)
 library(ggplot2)
+library(stats)
+
 
 getwd()
 
@@ -46,9 +48,27 @@ EI_Vector_ <- as.vector(as.vector(EI$Error_Index))
 ave_EI <- sum(EI_Vector_)/ length(EI_Vector_)
 
 
+##---Start Average of Analyte in question----
+meanEI <- mean(EI$Error_Index)
+sdEI <- sd(EI$Error_Index)
+
+cvWBC.Instrument2 <- cv(mean = meanEI, sd=sdEI)
+meanWBCInstrument1 <- mean(EI$WBCIntrument1)
+percentObsBias <- (ave_EI/meanWBCInstrument1) * 100
+
+
+##---End------
+
+sigmaDecisionChart <- (15 - percentObsBias) / cvWBC.Instrument2
 
 # plot EI by value of Instrument 1
 
+#----cv function----------
+cv <- function(mean,sd){
+        (sd/mean) *100
+}
+
+#---End---of function -----
 EI_g_p  <- EI_g + geom_point(color = "steelblue", size= 4, alpha = 1/2) + geom_hline(yintercept = ave_EI) + labs (title = "Error Index") + labs(x = "Intrument 1") + labs(y = "Instrument 2")
 print(EI_g_p)
 
@@ -72,8 +92,10 @@ EI <- qplot(WBCAveMeanDiff, BiasWBC, data = mergeData_Bias)
 ErrorIndex <- EI + geom_point(color = "steelblue", size = 4, alpha = 1/2)  +labs(title= "Error Index") + labs(x = paste(names(x)[2])) + labs(y = "Error Index (X-Y")
 
 ErrorIndex
-
+# 166 cv
+#
 #Reference
 ## https://www.aacc.org/publications/cln/articles/2013/september/total-analytic-error
 #3 Notes = Sigma MEtric = (%TEa - % Bias)/ %CV
 # https://www.westgard.com/clia.htm
+# CV = (sd/mean) * 100
