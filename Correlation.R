@@ -18,24 +18,31 @@ cnamesx <- names(x)
 # add Instrument "X" to header to indicate instrument 1
 
 for (i in seq_along(cnamesx)) {
-        colnames(x_DF)[i] <- paste(cnamesx[i],"X", sep = "")
+        colnames(x_DF)[i] <- paste(cnamesx[i],"Intrument1", sep = "")
         colnames(x_DF)[1] = "sample"
 }
 
 # add Instrument "X" to header to indicate instrument 1
 
 for (i in seq_along(cnamesx)) {
-        colnames(y_DF)[i] <- paste(cnamesx[i],"Y", sep = "")
+        colnames(y_DF)[i] <- paste(cnamesx[i],"Instrument2", sep = ".")
         colnames(y_DF)[1] = "sample"
 }
 
 mergeData_ <- merge(x_DF, y_DF, by = "sample")
 
 
-g <- qplot( WBCX, WBCY, data = mergeData_ )
+g <- qplot( WBCIntrument1, WBC.Instrument2, data = mergeData_ )
 
-p  <- g + geom_point(color = "steelblue", size= 4, alpha = 1/2) + geom_smooth(method = "lm") + labs (title = paste(names(x)[2], "Correlation", sep = " ")) + labs(x = "Intrument1") + labs(y = "Instrument2")
+p  <- g + geom_point(color = "steelblue", size= 4, alpha = 1/2) + geom_smooth(method = "lm") + labs (title = paste(names(x)[2], "Correlation", sep = " ")) + labs(x = "Intrument 1") + labs(y = "Instrument 2")
 print(p)
+
+# Calculating Error index
+EI <- mergeData_ %>%
+        mutate(Error_Index = WBCIntrument1 - WBC.Instrument2)
+
+EI_Vector_ <- as.vector(as.vector(EI$Error_Index))
+ave_EI <- sum(EI_Vector_)/ length(EI_Vector_)
 
 # Calculating for the Error Index
 WBCStats <- cor.test(mergeData_$WBCX, mergeData_$WBCY)
