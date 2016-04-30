@@ -39,10 +39,18 @@ print(p)
 
 # Calculating Error index
 EI <- mergeData_ %>%
-        mutate(Error_Index = WBCIntrument1 - WBC.Instrument2)
+        mutate(Error_Index = WBCIntrument1 - WBC.Instrument2,
+               aveEI_Vector_ = ave(as.vector(as.vector(EI$Error_Index))) )
 
 EI_Vector_ <- as.vector(as.vector(EI$Error_Index))
 ave_EI <- sum(EI_Vector_)/ length(EI_Vector_)
+
+
+
+# plot EI by value of Instrument 1
+
+EI_g_p  <- EI_g + geom_point(color = "steelblue", size= 4, alpha = 1/2) + geom_hline(yintercept = ave_EI) + labs (title = paste(names(x)[2], "Correlation", sep = " ")) + labs(x = "Intrument 1") + labs(y = "Instrument 2")
+print(EI_g_p)
 
 # Calculating for the Error Index
 WBCStats <- cor.test(mergeData_$WBCX, mergeData_$WBCY)
@@ -64,3 +72,4 @@ EI <- qplot(WBCAveMeanDiff, BiasWBC, data = mergeData_Bias)
 ErrorIndex <- EI + geom_point(color = "steelblue", size = 4, alpha = 1/2)  +labs(title= "Error Index") + labs(x = paste(names(x)[2])) + labs(y = "Error Index (X-Y")
 
 ErrorIndex
+
