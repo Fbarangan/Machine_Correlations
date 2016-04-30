@@ -57,6 +57,8 @@ meanWBCInstrument1 <- mean(EI$WBCIntrument1)
 percentObsBias <- (ave_EI/meanWBCInstrument1) * 100
 
 
+
+
 ##---End------
 
 sigmaDecisionChart <- (15 - percentObsBias) / cvWBC.Instrument2
