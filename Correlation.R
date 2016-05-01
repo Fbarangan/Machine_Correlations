@@ -48,7 +48,9 @@ print(p)
 EI <- mergeData_ %>%
         mutate(Error_Index = round(((mergeData_$WBC.Instrument2 - mergeData_$WBCIntrument1)/ mergeData_$WBCIntrument1) / 0.15, 3),
                aveEI_Vector_ = round(ave(as.vector(as.vector(EI$Error_Index))),3),
-               biasWBC = WBC.Instrument2 - EI$WBCIntrument1)
+               biasWBC = WBC.Instrument2 - EI$WBCIntrument1,
+               actualpercentBias =  (biasWBC / WBCIntrument1)*100,
+               aveActualpercentBias = mean(actualpercentBias))
 
 EI_Vector_ <- as.vector(as.vector(EI$Error_Index))
 ave_EI <- sum(EI_Vector_)/ length(EI_Vector_)
@@ -61,7 +63,10 @@ abs.ave_EI <-  abs(ave_EI)
 biasWBC_Vector <- as.vector(as.vector(EI$biasWBC))
 ave_biasWBC_Vector <- sum(biasWBC_Vector)/ length(biasWBC_Vector)
 abs.ave_biasWBC_Vector <-  abs(ave_biasWBC_Vector)
+
+
 ###---------
+
 
 ##---Start Average of Analyte in question----
 meanEIbiasWBC <- mean(EI$biasWBC)
@@ -75,11 +80,6 @@ abs.cvWBC.Instrument2 <- abs(cvWBC.Instrument2)
 
 sigmaDecisionChart <- (15 - abs.ave_biasWBC_Vector) / cvWBC.Instrument2
 
-# plot EI by value of Instrument 1
-
-
-EI_g_p  <- EI_g + geom_point(color = "steelblue", size= 4, alpha = 1/2) + geom_hline(yintercept = ave_EI) + labs (title = "Error Index") + labs(x = "Intrument 1") + labs(y = "Instrument 2")
-print(EI_g_p)
 
 # Calculating for the Error Index
 WBCStats <- cor.test(mergeData_$WBCIntrument1, mergeData_$WBC.Instrument2)
@@ -100,7 +100,19 @@ ErrorIndexplot <- EIplot + geom_point(color = "steelblue", size = 4, alpha = 1/2
 
 print(ErrorIndexplot)
 
-ErrorIndex
+# Plot actual  x-y bias to represent the 15 % TEa for WBC
+upperLimitTEa <- 15
+lowerLimitTea <- -15
+
+
+actualBiasWithRange <- qplot(WBCIntrument1, actualpercentBias, data = EI)
+
+ErrorIndexplot <- actualBiasWithRange + geom_point(color = "red", size = 2, alpha = 1/2)  +labs(title= "Actual Bias with TEa Range") + geom_hline(yintercept = upperLimitTEa, size=1 ) + geom_hline(yintercept = lowerLimitTea, size = 1 ) + geom_hline(yintercept = EI$aveActualpercentBias, color = "steelblue" ) + labs(x = paste(names(x)[2])) + labs(y = "Actual Bias(Y-X")
+
+print(ErrorIndexplot)
+
+
+
 # 166 cv
 #
 #Reference
