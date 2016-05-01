@@ -1,7 +1,10 @@
 # Machine Correlation or Hematology Department
 # Author : Felix Barangan, MS, RN, MLS(ASCP)
 
-library(MethComp)
+install.packages("broman")
+install.packages("dplyr")
+install.packages("stats")
+
 library(dplyr)
 library(ggplot2)
 library(stats)
