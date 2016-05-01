@@ -111,7 +111,9 @@ ErrorIndexplot <- actualBiasWithRange + geom_point(color = "red", size = 2, alph
 
 print(ErrorIndexplot)
 
-
+# Data
+showWBC <- EI %>%
+        select(sample, WBCIntrument1,  WBC.Instrument2,  biasWBC, actualpercentBias, Error_Index)
 
 # 166 cv
 #
