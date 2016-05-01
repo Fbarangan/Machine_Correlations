@@ -3,52 +3,55 @@ title: "co-R-relation"
 author: "Felix Barangan, MS,RN,MLS(ASCP)"
 date: "April 24, 2016"
 output:
-  word_document: default
-  pdf_document:
-    toc: yes
   html_document:
     fig_caption: yes
     keep_md: yes
+    number_sections: yes
     theme: spacelab
-    toc: yes
+  
 ---
-        
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8,
+                      echo=FALSE, warning=FALSE, message=FALSE)
+
+```
+                                                                     
+```{r load_packages, include=FALSE}
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(stats)
+library(knitr)
+```
+               
 ## Concept
 This application is an attempt to perform and show statistical comparison of two instruments in order to comply from the increase regulations by State and other regulatory bodies on total quality and risk management
-                                       
-###Plots and Diagram
-* Scatter Plot
-```{r, }
-library(MethComp)
-library(dplyr)
-library(ggplot2)
-library(stats)
-```
-        
-Reading files
-```{r load_file, echo=FALSE, results='hide'}
-library(MethComp)
-library(dplyr)
-library(ggplot2)
-library(stats)
+## Data loading and manipulations                                  
+files added and processed for data minning and correlations     
 
-
-getwd()
-
+```{r load_file, echo=TRUE}
+# loading file...
 x <- read.csv("Instrument1.csv")
 y <- read.csv("Instrument2.csv")
 
+```
+       
+```{r transform_data}
+# transform to dplyr
+# 
 x_DF <- tbl_df(x)
 y_DF <- tbl_df(y)
 
+# creat e coefficient of variation cv function
 cv <- function(mean,sd){
         (sd/mean) *100
 }
 
-
+# get the headers name to rename them accordingly with concatenated instrument name assignment
 cnamesx <- names(x)
-# add Instrument "X" to header to indicate instrument 1
 
+# loop to rename headers and combine the two files
+# 
 for (i in seq_along(cnamesx)) {
         colnames(x_DF)[i] <- paste(cnamesx[i],"Intrument1", sep = "")
         colnames(x_DF)[1] = "sample"
@@ -61,65 +64,69 @@ for (i in seq_along(cnamesx)) {
         colnames(y_DF)[1] = "sample"
 }
 
+#merge the two file from the 2  instrument into 1 table. It is combine by sample ID. The assumtion is that a sample particular sample was run on both instrument
 mergeData_ <- merge(x_DF, y_DF, by = "sample")
 
-
-g <- qplot( WBCIntrument1, WBC.Instrument2, data = mergeData_ )
-
-p  <- g + geom_point(color = "steelblue", size= 4, alpha = 1/2) + geom_smooth(method = "lm") + labs (title = paste(names(x)[2], "Correlation", sep = " ")) + labs(x = "Intrument 1") + labs(y = "Instrument 2")
-print(p)
-        
-# Calculating Error index
-# will need to consider this 0.15 as possible user input        
+```        
+                
+```{r, load_dplry, echo=TRUE, message=TRUE, include=FALSE}
+# selection on table and converting it into 1 main table to be
+# used for data manipulation
+library(plyr)
 library(dplyr)
+```
+                                                                                                                                                       
+```{r load_EI}
 EI <- mergeData_ %>%
-        mutate(Error_Index = round(((mergeData_$WBC.Instrument2 - mergeData_$WBCIntrument1)/ mergeData_$WBCIntrument1) / 0.15, 3),
-               aveEI_Vector_ = round(ave(as.vector(as.vector(EI$Error_Index))),3),
-               biasWBC = WBC.Instrument2 - EI$WBCIntrument1,
+        mutate(Error_Index = round(((WBC.Instrument2 - WBCIntrument1)/ WBCIntrument1) / 0.15, 3),
+               aveEI_Vector_ = round(ave(as.vector(as.vector(Error_Index))),3),
+               biasWBC = WBC.Instrument2 - WBCIntrument1,
                actualpercentBias =  (biasWBC / WBCIntrument1)*100,
                aveActualpercentBias = mean(actualpercentBias))
 
+                
+# to svae the Error Index into a vector to find out the ave .. etc
 EI_Vector_ <- as.vector(as.vector(EI$Error_Index))
 ave_EI <- sum(EI_Vector_)/ length(EI_Vector_)
+
+# absolute value of Erorr Index (in one result)
 abs.ave_EI <-  abs(ave_EI)
-###-----
 
-
-#Code for bias y-x
+#Code for absolute average bias between the two instrument(Y-X) 
 
 biasWBC_Vector <- as.vector(as.vector(EI$biasWBC))
 ave_biasWBC_Vector <- sum(biasWBC_Vector)/ length(biasWBC_Vector)
 abs.ave_biasWBC_Vector <-  abs(ave_biasWBC_Vector)
 
 
-###---------
-
-
 ##---Start Average of Analyte in question----
+
+# mean of the biases. Data was taken from the EI table using dplyr
 meanEIbiasWBC <- mean(EI$biasWBC)
+#Standard deviations of the biases. Data taken from the EI table
 sdEIbiasWBC <- sd(EI$biasWBC)
 
+# CV calculated using the function cv
 cvWBC.Instrument2 <- cv(mean = meanEIbiasWBC, sd=sdEIbiasWBC)
 abs.cvWBC.Instrument2 <- abs(cvWBC.Instrument2)
+```
 
 
-##---End------
+                                       
+###Plots and Diagram
+* Scatter Plot
 
-sigmaDecisionChart <- (15 - abs.ave_biasWBC_Vector) / cvWBC.Instrument2
+```{r plots,  results='asis' }
+par(mfrow=c(2,2))
 
+###---- linear plots between Instrument1 and Instrument 2-----
+g <- qplot( WBCIntrument1, WBC.Instrument2, data = mergeData_ )
 
-# Calculating for the Error Index
-WBCStats <- cor.test(mergeData_$WBCIntrument1, mergeData_$WBC.Instrument2)
-WBCStats
-WBCDdeming <- Deming(mergeData_$WBCIntrument1, mergeData_$WBC.Instrument2)
-WBCDdeming
-
-WBCcoef <- coef(lm(WBCIntrument1 ~ WBC.Instrument2, data = mergeData_))
-
-WBCcoef
+p  <- g + geom_point(color = "steelblue", size= 4, alpha = 1/2) + geom_smooth(method = "lm") + labs (title = paste(names(x)[2], "Correlation", sep = " ")) + labs(x = "Intrument 1") + labs(y = "Instrument 2")
+print(p)
 
 
-# Plot the error index
+# Plot the Error_index
 
 EIplot <- qplot(WBCIntrument1, Error_Index, data = EI)
 
@@ -131,28 +138,15 @@ print(ErrorIndexplot)
 upperLimitTEa <- 15
 lowerLimitTea <- -15
 
+# Actual Percent Bias plot
+# 
 
 actualBiasWithRange <- qplot(WBCIntrument1, actualpercentBias, data = EI)
 
-ErrorIndexplot <- actualBiasWithRange + geom_point(color = "red", size = 2, alpha = 1/2)  +labs(title= "Actual Bias with TEa Range") + geom_hline(yintercept = upperLimitTEa, size=1 ) + geom_hline(yintercept = lowerLimitTea, size = 1 ) + geom_hline(yintercept = EI$aveActualpercentBias, color = "steelblue" ) + labs(x = paste(names(x)[2])) + labs(y = "Actual Bias(Y-X")
+actualBiasWithRangePlot <- actualBiasWithRange + geom_point(color = "red", size = 2, alpha = 1/2)  +labs(title= "Actual Bias with TEa Range") + geom_hline(yintercept = upperLimitTEa, size=1 ) + geom_hline(yintercept = lowerLimitTea, size = 1 ) + geom_hline(yintercept = EI$aveActualpercentBias, color = "steelblue" ) + labs(x = paste(names(x)[2])) + labs(y = "Actual Bias(Y-X")
 
-print(ErrorIndexplot)
-
-# Data
-showWBC <- EI %>%
-        select(sample, WBCIntrument1,  WBC.Instrument2,  biasWBC, actualpercentBias, Error_Index)
-
-# 166 cv
-#
-#Reference
-## https://www.aacc.org/publications/cln/articles/2013/september/total-analytic-error
-#3 Notes = Sigma MEtric = (%TEa - % Bias)/ %CV
-# https://www.westgard.com/clia.htm
-# CV = (sd/mean) * 100
+print(actualBiasWithRangePlot)
 
 
+```
 
-
-
-              
-        
