@@ -1,7 +1,66 @@
 ---
-title: "coRelation.rmd"
-author: "Felix Barangan"
-date: "April 30, 2016"
-output: html_document
+title: "co-R-relation"
+author: "Felix Barangan, MS,RN,MLS(ASCP)"
+date: "April 24, 2016"
+output: 
+  html_document: 
+    fig_caption: yes
+    keep_md: yes
+    theme: spacelab
+    toc: yes
 ---
+        
+## Concept
+This application is an attempt to perform and show statistical comparison of two instruments in order to comply from the increase regulations by State and other regulatory bodies on total quality and risk management
+
+###Plots and Diagram
+* Scatter Plot
+```{r, echo=FALSE, results='hide'}
+library(MethComp)
+library(dplyr)
+library(ggplot2)
+library(stats)
+```
+        
+Reading files
+```{r load_file, echo=FALSE, results='hide'}
+x <- read.csv("Instrument1.csv")
+y <- read.csv("Instrument2.csv")
+
+x_DF <- tbl_df(x)
+y_DF <- tbl_df(y)
+
+cv <- function(mean,sd){
+        (sd/mean) *100
+}
+
+
+cnamesx <- names(x)
+# add Instrument "X" to header to indicate instrument 1
+
+for (i in seq_along(cnamesx)) {
+        colnames(x_DF)[i] <- paste(cnamesx[i],"Intrument1", sep = "")
+        colnames(x_DF)[1] = "sample"
+}
+
+# add Instrument "X" to header to indicate instrument 1
+
+for (i in seq_along(cnamesx)) {
+        colnames(y_DF)[i] <- paste(cnamesx[i],"Instrument2", sep = ".")
+        colnames(y_DF)[1] = "sample"
+}
+
+mergeData_ <- merge(x_DF, y_DF, by = "sample")
+
+
+g <- qplot( WBCIntrument1, WBC.Instrument2, data = mergeData_ )
+
+p  <- g + geom_point(color = "steelblue", size= 4, alpha = 1/2) + geom_smooth(method = "lm") + labs (title = paste(names(x)[2], "Correlation", sep = " ")) + labs(x = "Intrument 1") + labs(y = "Instrument 2")
+print(p)
+```
+
+
+
+
+              
         
