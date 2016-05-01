@@ -1,17 +1,14 @@
 ---
 title: "co-R-relation"
-author: "Felix Barangan, MS,RN,MLS(ASCP)"
-date: "April 24, 2016"
 output:
   html_document:
     fig_caption: yes
     keep_md: yes
-    number_sections: yes
     theme: spacelab
-  
+                                                    
 ---
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=12, fig.height=8,
+knitr::opts_chunk$set(fig.width=3, fig.height=3,
                       echo=FALSE, warning=FALSE, message=FALSE)
 
 ```
@@ -23,10 +20,11 @@ library(ggplot2)
 library(stats)
 library(knitr)
 ```
-               
-## Concept
-This application is an attempt to perform and show statistical comparison of two instruments in order to comply from the increase regulations by State and other regulatory bodies on total quality and risk management
-## Data loading and manipulations                                  
+                          
+###  Concept
+This application is an attempt to perform and show statistical comparison of two instruments in order to comply from the increase regulations by State and other regulatory bodies on total quality and risk management.
+                
+### Data loading and manipulations                                  
 files added and processed for data minning and correlations     
 
 ```{r load_file, echo=TRUE}
@@ -69,13 +67,13 @@ mergeData_ <- merge(x_DF, y_DF, by = "sample")
 
 ```        
                 
-```{r, load_dplry, echo=TRUE, message=TRUE, include=FALSE}
+```{r, load_dplry,}
 # selection on table and converting it into 1 main table to be
 # used for data manipulation
 library(plyr)
 library(dplyr)
 ```
-                                                                                                                                                       
+                                                                                                                                                           
 ```{r load_EI}
 EI <- mergeData_ %>%
         mutate(Error_Index = round(((WBC.Instrument2 - WBCIntrument1)/ WBCIntrument1) / 0.15, 3),
@@ -110,10 +108,10 @@ sdEIbiasWBC <- sd(EI$biasWBC)
 cvWBC.Instrument2 <- cv(mean = meanEIbiasWBC, sd=sdEIbiasWBC)
 abs.cvWBC.Instrument2 <- abs(cvWBC.Instrument2)
 ```
-
-
+       
+                  
                                        
-###Plots and Diagram
+#### Plots and Diagram
 * Scatter Plot
 
 ```{r plots,  results='asis' }
@@ -122,15 +120,15 @@ par(mfrow=c(2,2))
 ###---- linear plots between Instrument1 and Instrument 2-----
 g <- qplot( WBCIntrument1, WBC.Instrument2, data = mergeData_ )
 
-p  <- g + geom_point(color = "steelblue", size= 4, alpha = 1/2) + geom_smooth(method = "lm") + labs (title = paste(names(x)[2], "Correlation", sep = " ")) + labs(x = "Intrument 1") + labs(y = "Instrument 2")
+p  <- g + geom_point(color = "steelblue", size= 2, alpha = 1/2) + geom_smooth(method = "lm") + labs (title = paste(names(x)[2], "Linear Model", sep = " ")) + labs(x = "Intrument 1") + labs(y = "Instrument 2")
 print(p)
 
-
+                
 # Plot the Error_index
 
 EIplot <- qplot(WBCIntrument1, Error_Index, data = EI)
 
-ErrorIndexplot <- EIplot + geom_point(color = "steelblue", size = 4, alpha = 1/2)  +labs(title= "Error Index") + geom_hline(yintercept = EI$aveEI_Vector_ ) + labs(x = paste(names(x)[2])) + labs(y = "Error Index (X-Y")
+ErrorIndexplot <- EIplot + geom_point(color = "steelblue", size = 2, alpha = 1/2)  +labs(title= "Error Index") + geom_hline(yintercept = EI$aveEI_Vector_ ) + labs(x = paste(names(x)[2])) + labs(y = "Error Index (X-Y)/TEa")
 
 print(ErrorIndexplot)
 
@@ -143,7 +141,7 @@ lowerLimitTea <- -15
 
 actualBiasWithRange <- qplot(WBCIntrument1, actualpercentBias, data = EI)
 
-actualBiasWithRangePlot <- actualBiasWithRange + geom_point(color = "red", size = 2, alpha = 1/2)  +labs(title= "Actual Bias with TEa Range") + geom_hline(yintercept = upperLimitTEa, size=1 ) + geom_hline(yintercept = lowerLimitTea, size = 1 ) + geom_hline(yintercept = EI$aveActualpercentBias, color = "steelblue" ) + labs(x = paste(names(x)[2])) + labs(y = "Actual Bias(Y-X")
+actualBiasWithRangePlot <- actualBiasWithRange + geom_point(color = "red", size = 2, alpha = 1/2)  +labs(title= "Actual Bias with TEa Range") + geom_hline(yintercept = upperLimitTEa, size=1 ) + geom_hline(yintercept = lowerLimitTea, size = 1 ) + geom_hline(yintercept = EI$aveActualpercentBias, color = "steelblue" ) + labs(x = paste(names(x)[2])) + labs(y = "Actual Bias(Y-X)")
 
 print(actualBiasWithRangePlot)
 
