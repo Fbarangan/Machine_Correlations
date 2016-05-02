@@ -4,10 +4,12 @@
 install.packages("broman")
 install.packages("dplyr")
 install.packages("stats")
+install.packages("mcr")
 
 library(dplyr)
 library(ggplot2)
 library(stats)
+library(mcr)
 
 
 getwd()
@@ -89,8 +91,8 @@ sigmaDecisionChart <- (15 - abs.ave_biasWBC_Vector) / cvWBC.Instrument2
 # Calculating for the Error Index
 WBCStats <- cor.test(mergeData_$WBCIntrument1, mergeData_$WBC.Instrument2)
 WBCStats
-WBCDdeming <- Deming(mergeData_$WBCIntrument1, mergeData_$WBC.Instrument2)
-WBCDdeming
+WBCDeming <- mcreg (mergeData_$WBCIntrument1, mergeData_$WBC.Instrument2, method.reg = "Deming")
+WBCDeming
 
 WBCcoef <- coef(lm(WBCIntrument1 ~ WBC.Instrument2, data = mergeData_))
 

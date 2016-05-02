@@ -12,12 +12,13 @@ knitr::opts_chunk$set(fig.width=3, fig.height=3,
                       echo=FALSE, warning=FALSE, message=FALSE)
 
 ```
-                                                                     
+                                                                                 
 ```{r load_packages, include=FALSE}
 library(plyr)
 library(dplyr)
 library(ggplot2)
 library(stats)
+library(mcr)
 library(knitr)
 ```
                           
@@ -111,8 +112,7 @@ abs.cvWBC.Instrument2 <- abs(cvWBC.Instrument2)
        
                   
                                        
-#### Plots and Diagram
-* Scatter Plot
+#### Plots and Diagrams
 
 ```{r plots,  results='asis' }
 par(mfrow=c(2,2))
@@ -147,4 +147,17 @@ print(actualBiasWithRangePlot)
 
 
 ```
+### Statistics                       
+- Deming Regression
+```{r deming_regression, }
+WBCDeming <- mcreg (mergeData_$WBCIntrument1, mergeData_$WBC.Instrument2, method.reg = "Deming")
+```
+```{r, deming_result, results=TRUE}
+WBCDeming
+```
 
+                      
+Under Construction....
+
+Felix Barangan, MS,RN,MLS(ASCP)
+        
