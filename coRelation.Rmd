@@ -9,8 +9,8 @@ output:
 ---
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=3, fig.height=3,
-                      echo=FALSE, warning=FALSE, message=FALSE)
-
+                      echo=FALSE, warning=FALSE, message=FALSE, results = FALSE)
+        
 ```
                                                                                  
 ```{r load_packages, include=FALSE}
@@ -21,7 +21,8 @@ library(stats)
 library(mcr)
 library(knitr)
 ```
-                          
+
+***                          
 ###  Concept
 This application is an attempt to perform and show statistical comparison of two instruments in order to comply from the increase regulations by State and other regulatory bodies on total quality and risk management.
                 
@@ -81,9 +82,10 @@ EI <- mergeData_ %>%
                aveEI_Vector_ = round(ave(as.vector(as.vector(Error_Index))),3),
                biasWBC = WBC.Instrument2 - WBCIntrument1,
                actualpercentBias =  (biasWBC / WBCIntrument1)*100,
-               aveActualpercentBias = mean(actualpercentBias))
+               aveActualpercentBias = mean(actualpercentBias),
+               absactualpercentBias = abs(actualpercentBias))
 
-                
+                    
 # to svae the Error Index into a vector to find out the ave .. etc
 EI_Vector_ <- as.vector(as.vector(EI$Error_Index))
 ave_EI <- sum(EI_Vector_)/ length(EI_Vector_)
@@ -144,20 +146,43 @@ actualBiasWithRange <- qplot(WBCIntrument1, actualpercentBias, data = EI)
 actualBiasWithRangePlot <- actualBiasWithRange + geom_point(color = "red", size = 2, alpha = 1/2)  +labs(title= "Actual Bias with TEa Range") + geom_hline(yintercept = upperLimitTEa, size=1 ) + geom_hline(yintercept = lowerLimitTea, size = 1 ) + geom_hline(yintercept = EI$aveActualpercentBias, color = "steelblue" ) + labs(x = paste(names(x)[2])) + labs(y = "Actual Bias(Y-X)")
 
 print(actualBiasWithRangePlot)
-
+        
 
 ```
+
+***
+        
 ### Statistics                       
-- Deming Regression
-```{r deming_regression, }
+* Deming Regression
+```{r deming_regression }
 WBCDeming <- mcreg (mergeData_$WBCIntrument1, mergeData_$WBC.Instrument2, method.reg = "Deming")
-```
-```{r, deming_result, results=TRUE}
-WBCDeming
+WBCDeming@para
 ```
 
-                      
-Under Construction....
 
+* Pearson's product-moment correlation                            
+```{r Pearson}
+WBCStats <- cor.test(mergeData_$WBCIntrument1, mergeData_$WBC.Instrument2)
+WBCStats
+```
+ 
+### Discussions
+        
+`r nrow(mergeData_)` samples were run for both Instrument-X (Independent) and Instrument-Y(Dependent). The result were evaluated using the standard statistical analysis.      
+
+* The following sample failed the recommended [allowable Total error of 15%][1]
+        
+```{r failed}
+EIfailedbias <- EI %>%
+        filter(failed = absactualpercentBias > 15) %>%
+        select(sample, WBCIntrument1,WBC.Instrument2, actualpercentBias)
+EIfailedbias      
+```
+
+                            
+            
+This site is Under Construction....
+        
 Felix Barangan, MS,RN,MLS(ASCP)
         
+[1]: https://www.westgard.com/clia.htm

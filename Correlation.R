@@ -49,7 +49,9 @@ EI <- mergeData_ %>%
                aveEI_Vector_ = round(ave(as.vector(as.vector(Error_Index))),3),
                biasWBC = WBC.Instrument2 - WBCIntrument1,
                actualpercentBias =  (biasWBC / WBCIntrument1)*100,
-               aveActualpercentBias = mean(actualpercentBias))
+               aveActualpercentBias = mean(actualpercentBias),
+               absactualpercentBias = abs(actualpercentBias))
+
 
 
 EI_Vector_ <- as.vector(as.vector(EI$Error_Index))
@@ -85,7 +87,7 @@ abs.cvWBC.Instrument2 <- abs(cvWBC.Instrument2)
 
 ##---End------
 
-sigmaDecisionChart <- (15 - abs.ave_biasWBC_Vector) / cvWBC.Instrument2
+sigmaDecisionChart <- (15 - abs.ave_biasWBC_Vector) / cvWBC
 
 
 # Calculating for the Error Index
@@ -118,9 +120,13 @@ actualBiasWithRangePlot <- actualBiasWithRange + geom_point(color = "red", size 
 
 print(actualBiasWithRangePlot)
 
+#failed bias
+
+
 # Data
-showWBC <- EI %>%
-        select(sample, WBCIntrument1,  WBC.Instrument2,  biasWBC, actualpercentBias, Error_Index)
+EIfailedbias <- EI %>%
+        filter(failed = absactualpercentBias > 15) %>%
+        select(sample, WBCIntrument1,WBC.Instrument2, actualpercentBias)
 
 # 166 cv
 #
